@@ -1,34 +1,29 @@
-import csv
 from hash_table import HashTable
 from package import Package
 from truck import Truck
+from data_loader import (
+    loadDistanceData,
+    loadAddressData, 
+    loadPackageData, 
+    get_distance_between, 
+    displayDistanceData,
+    displayAddressData
+)
 
-def loadPackageData(hash_table, file_path):
-        with open(file_path, mode='r') as file:
-            csv_reader = csv.reader(file)
-            next(csv_reader)  # Skip the header row
-            next(csv_reader)  # Skip the header row
-            for row in csv_reader:
-                # Assuming the CSV columns are in the order:
-                # PackageID, Address, Deadline, City, Zip Code, Weight, Status
-                package_id = int(row[0])
-                address = row[1]
-                city = row[2]
-                state = row[3]
-                zip = row[4]
-                deadline = row[5]
-                weight = row[6]
-                status = row[7]
-                delivery_time = None  # No delivery time in csv
-
-                # Create a Package object
-                package = Package(package_id, address, city, state, zip, deadline, weight, status, delivery_time)
-
-                # Insert the Package object into the HashTable
-                hash_table.insert(package)
 
 hash_table = HashTable(size=10)  # Create a HashTable instance
-loadPackageData(hash_table, '/Users/rodrigo/Documents/repos/Parcel-Routing-System/WGUPS-package-v2.csv')
-hash_table.display()
+loadPackageData(hash_table, '/Users/rodrigo/Documents/repos/Parcel-Routing-System/WGUPS-package-v2.csv') # Load HashTable with package data
+# hash_table.display()
+
+distanceData = loadDistanceData('/Users/rodrigo/Documents/repos/Parcel-Routing-System/WGUPS-distance-matrix.csv') # Load distance matrix data
+# displayDistanceData(distanceData)
+addressData, address_to_index = loadAddressData('/Users/rodrigo/Documents/repos/Parcel-Routing-System/WGUPS-address.csv') # Load address data
+# displayAddressData(addressData)
+
+#Test
+address1 = "1060 Dalton Ave S"  # Replace with the actual address
+address2 = "195 W Oakland Ave"  # Replace with the actual address
+distance = get_distance_between(address1, address2, address_to_index, distanceData)
+print(f"The distance between {address1} and {address2} is {distance} miles.")
 
 
