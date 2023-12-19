@@ -41,7 +41,6 @@ def displayDistanceData(distanceData):
     for row in distanceData:
         print(row)
 
-
 def loadAddressData(file_path):
     addressData = []
     address_to_index = {}
@@ -58,14 +57,3 @@ def displayAddressData(addressData):
     print("Addresses:")
     for index, address in enumerate(addressData):
         print(f"{index}: {address}")
-
-
-def get_distance_between(address1, address2, address_to_index, distanceData):
-    index1 = address_to_index[address1]
-    index2 = address_to_index[address2]
-     # Get the distance from index1 to index2
-    distance = distanceData[index1][index2]
-     # If the distance is 0.0 (assuming this represents an empty value), try the opposite
-    if distance == 0.0 and index1 != index2:  # We check index1 != index2 to avoid self-distances which are correctly 0.0
-        distance = distanceData[index2][index1]
-    return distance

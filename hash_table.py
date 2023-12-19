@@ -37,3 +37,16 @@ class HashTable:
             if package.package_id == package_id:
                 return package
             return None #Return None if package not found
+    
+    def update_package_status(self, package_id, new_status, delivery_time):
+        # Assuming each package is stored with its package_id as key
+        package = self.lookup(package_id)
+        if package:
+            package.status = new_status
+            package.delivery_time = delivery_time
+
+    def get_all_packages(self):
+        all_packages = []
+        for bucket in self.table:
+            all_packages.extend(bucket)
+        return all_packages
