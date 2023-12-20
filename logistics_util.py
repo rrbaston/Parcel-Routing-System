@@ -43,7 +43,7 @@ def distanceBetween(address1, address2, address_to_index, distanceData):
 
 def truckDeliverPackagesBestTour(truck, address_to_index, distanceData, hashTable):
     total_miles = 0
-    current_time = datetime.timedelta()  # Assuming delivery starts at time 0
+    delivered_package_ids = []
 
     for i in range(len(truck.truckPackagesBestTour) - 1):
         package = truck.truckPackagesBestTour[i]
@@ -55,32 +55,17 @@ def truckDeliverPackagesBestTour(truck, address_to_index, distanceData, hashTabl
         distance = distanceBetween(address1, address2, address_to_index, distanceData)
         delivery_time = timeToDeliver(distance)
 
-        # Update total miles and current time
         total_miles += distance
         truck.current_time += delivery_time
 
-        # Update package delivery status and time in the hash table
-        # Assuming hashTable has a method to update package status
         hashTable.update_package_status(package.package_id, "delivered", truck.current_time)
+        delivered_package_ids.append(package.package_id)
 
-    # After completing deliveries, print total miles
     print(f"Total miles traveled by Truck {truck.truck_id}: {total_miles}")
+    return delivered_package_ids
+
 
 # Update the delivery status of each package and calculate the time taken for delivery
 def timeToDeliver(distance):
     hours = distance / 18  # Truck speed is 18 mph
     return datetime.timedelta(hours=hours)
-
-
-
-
-
-
-
-
-# # Example usage:
-# # For each leg of the delivery route, calculate the time to deliver and update package status
-# for i in range(len(truck.truckPackagesBestTour) - 1):
-#     # ... get distance ...
-#     delivery_time = timeToDeliver(distance)
-#     # Update package status and delivery time

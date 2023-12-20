@@ -52,60 +52,43 @@ class Truck:
         for pkg in self.truckPackagesBestTour:
             print(f"  Package ID: {pkg.package_id}, Address: {pkg.address}")
 
-    # Heuristic Algorithm
-    def load_truck_with_priorities(self, trucks, package_list):
+    def load_truck_with_priorities(self, package_list):
         # Sort the package list based on the delivery deadline
-        # Convert the deadline to a datetime object for accurate sorting
-        package_list.sort(key=lambda pkg: datetime.strptime(pkg.deadline, '%I:%M %p') if pkg.deadline != 'EOD' else datetime.max)
+        package_list.sort(key=lambda pkg: datetime.datetime.strptime(pkg.deadline, '%I:%M %p') if pkg.deadline != 'EOD' else datetime.datetime.max)
 
-        # Separate the packages based on special notes and deadlines
-        truck_specific_packages = [pkg for pkg in package_list if 'Can only be on truck' in pkg.special_notes]
-        grouped_packages = [pkg for pkg in package_list if 'Must be delivered with' in pkg.special_notes]
-        delayed_packages = [pkg for pkg in package_list if 'Delayed' in pkg.special_notes]
-        early_deadline_packages = [pkg for pkg in package_list if pkg.deadline != 'EOD' and pkg not in truck_specific_packages and pkg not in grouped_packages and pkg not in delayed_packages]
-        eod_packages = [pkg for pkg in package_list if pkg.deadline == 'EOD' and pkg not in truck_specific_packages and pkg not in grouped_packages and pkg not in delayed_packages]
-
-        # Load packages that must go on specific trucks first
+        # Filter and load packages that can only be on this truck
+        truck_specific_packages = [pkg for pkg in package_list if f'Can only be on truck {self.truck_id}' in pkg.special_notes]
         for pkg in truck_specific_packages:
-            for truck in trucks:
-                if f'Can only be on truck {truck.truck_id}' in pkg.special_notes and len(truck.truckPackages) < truck.capacity:
-                    truck.load_package(pkg)
+            if len(self.truckPackages) < self.capacity:
+                self.truckPackages.append(pkg)
 
-        # Load packages that must be delivered together
+        # Filter and load packages that must be delivered together
+        # Here we would need more logic to handle groups, this is a placeholder
+        grouped_packages = [pkg for pkg in package_list if 'Must be delivered with' in pkg.special_notes]
         for pkg in grouped_packages:
-            for truck in trucks:
-                if len(truck.truckPackages) < truck.capacity - len(grouped_packages):
-                    truck.load_package(pkg)
+            if len(self.truckPackages) < self.capacity:
+                self.truckPackages.append(pkg)
 
-        # Load packages with the earliest deadlines (excluding the delayed ones)
+        # Filter and load packages with earliest deadlines not in the special categories
+        early_deadline_packages = [pkg for pkg in package_list if pkg.deadline != 'EOD' and pkg not in truck_specific_packages and pkg not in grouped_packages]
         for pkg in early_deadline_packages:
-            for truck in trucks:
-                if len(truck.truckPackages) < truck.capacity:
-                    truck.load_package(pkg)
+            if len(self.truckPackages) < self.capacity:
+                self.truckPackages.append(pkg)
 
-        # Load delayed packages. This code is only triggered after the delay period is over
+        # Filter and load delayed packages based on current time
+        delayed_packages = [pkg for pkg in package_list if 'Delayed' in pkg.special_notes]
         for pkg in delayed_packages:
-            # Extract the delay time from the special notes
             delay_time_str = pkg.special_notes.split('---will not arrive to depot until ')[-1]
-            delay_time = pkg.strptime(delay_time_str, '%I:%M %p').time()
-            if self.current_time.time() < delay_time:
-                print(f"Package {pkg.package_id} is delayed. Cannot load until {delay_time_str}.")
-                return
-        # If not delayed, or the delay time has passed, load the package
-        if len(self.truckPackages) < self.capacity:
-            self.truckPackages.append(pkg)
-            print(f"Loaded package {pkg.package_id} onto truck {self.truck_id}.")
-        else:
-            print(f"Truck {self.truck_id} is full. Cannot load more packages.")
+            delay_time = datetime.datetime.strptime(delay_time_str, '%I:%M %p').time()
+            if self.current_time >= delay_time:
+                if len(self.truckPackages) < self.capacity:
+                    self.truckPackages.append(pkg)
 
-        # Finally, load the EOD packages
+        # Load EOD packages last if there's still capacity
+        eod_packages = [pkg for pkg in package_list if pkg.deadline == 'EOD' and pkg not in truck_specific_packages and pkg not in grouped_packages and pkg not in delayed_packages]
         for pkg in eod_packages:
-            for truck in trucks:
-                if len(truck.truckPackages) < truck.capacity:
-                    truck.load_package(pkg)
-
-        # Return the list of trucks with the loaded packages
-        return trucks
+            if len(self.truckPackages) < self.capacity:
+                self.truckPackages.append(pkg)
 
 
 # hash_table = HashTable(size=10)  # Create a HashTable instance
