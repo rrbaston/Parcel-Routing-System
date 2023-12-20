@@ -57,11 +57,11 @@ def truckDeliverPackagesBestTour(truck, address_to_index, distanceData, hashTabl
 
         # Update total miles and current time
         total_miles += distance
-        current_time += delivery_time
+        truck.current_time += delivery_time
 
         # Update package delivery status and time in the hash table
         # Assuming hashTable has a method to update package status
-        hashTable.update_package_status(package.package_id, "delivered", current_time)
+        hashTable.update_package_status(package.package_id, "delivered", truck.current_time)
 
     # After completing deliveries, print total miles
     print(f"Total miles traveled by Truck {truck.truck_id}: {total_miles}")
